@@ -60,15 +60,6 @@
                     <h2 class="text-2xl font-bold text-center text-gray-800">Formulário de Coleta</h2>
                     <p class="text-center text-gray-500 mt-1">Preencha os campos abaixo para gerar seu plano de ação.</p>
                 </div>
-
-                <!-- Card de Informação Inicial -->
-                <div class="bg-white p-6 sm:p-8 rounded-xl shadow-md border border-gray-200">
-                    <label for="municipio" class="block text-lg font-semibold text-gray-800 mb-1">
-                        Qual o nome do seu município?
-                    </label>
-                    <p class="text-red-600 text-sm font-medium mb-4">* Obrigatório</p>
-                    <input type="text" id="municipio" name="municipio" required class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition" placeholder="Ex: Curitiba">
-                </div>
                 
                 <!-- Container para os pilares e temas (cards) -->
                 <div id="questionnaire-container" class="space-y-12"></div>
@@ -134,11 +125,11 @@
             { "id": "p2_t4_q2", "pilar": "Pilar 2: Vias Seguras", "tema": "Mapeamento", "text_pt": "O município efetua o mapeamento do nível de conservação e características das vias?", "level": "basic", "type": "boolean", "cronologia": "2.2", "action_text": "Mapear o nível de conservação e características das vias" },
             { "id": "p3_t1_q1", "pilar": "Pilar 3: Segurança Veicular", "tema": "Características da frota", "text_pt": "Qual a quantidade de caminhões, em %, na frota do município?", "level": "basic", "type": "integer", "cronologia": "-", "action_text": "Analisar o perfil da frota de caminhões" },
             { "id": "p3_t1_q2", "pilar": "Pilar 3: Segurança Veicular", "tema": "Características da frota", "text_pt": "Qual a quantidade de veículo de duas rodas, em %, na frota do município?", "level": "basic", "type": "integer", "cronologia": "-", "action_text": "Analisar o perfil da frota de duas rodas" },
-            { "id": "p3_t1_q3", "pilar": "Pilar 3: Segurança Veicular", "tema": "Características da frota", "text_pt": "Qual a idade média da frota?", "level": "strategic", "type": "integer", "cronologia": "2.3", "action_text": "Analisar a idade média da frota e criar políticas de renovação" },
+            { "id": "p3_t1_q3", "pilar": "Pilar 3: Segurança Veicular", "tema": "Características da frota", "text_pt": "Qual a idade média da frota?", "level": "strategic", "type": "integer", "cronologia": "2.3", "show_if": ["p3_t1_q1", "p3_t1_q2"], "action_text": "Analisar a idade média da frota e criar políticas de renovação" },
             { "id": "p3_t2_q1", "pilar": "Pilar 3: Segurança Veicular", "tema": "Inspeções veiculares", "text_pt": "O município faz inspeções veiculares de segurança?", "level": "basic", "type": "boolean", "cronologia": "1.8", "action_text": "Implementar inspeções veiculares de segurança" },
             { "id": "p3_t2_q2", "pilar": "Pilar 3: Segurança Veicular", "tema": "Inspeções veiculares", "text_pt": "O município faz inspeções veiculares de emissões (ambiental)?", "level": "basic", "type": "boolean", "cronologia": "1.9", "action_text": "Implementar inspeções veiculares de emissões (ambiental)" },
-            { "id": "p3_t2_q3", "pilar": "Pilar 3: Segurança Veicular", "tema": "Inspeções veiculares", "text_pt": "O município efetua inspeções veiculares de segurança com qual frequência (por mês)?", "level": "strategic", "type": "integer", "cronologia": "2.1", "show_if": ["p3_t2_q1"], "action_text": "Aumentar a frequência de inspeções de segurança" },
-            { "id": "p3_t2_q4", "pilar": "Pilar 3: Segurança Veicular", "tema": "Inspeções veiculares", "text_pt": "O município efetua inspeções veiculares de emissões com qual frequência (por mês)?", "level": "strategic", "type": "integer", "cronologia": "2.2", "show_if": ["p3_t2_q2"], "action_text": "Aumentar a frequência de inspeções de emissões" },
+            { "id": "p3_t2_q3", "pilar": "Pilar 3: Segurança Veicular", "tema": "Inspeções veiculares", "text_pt": "O município efetua inspeções veiculares de segurança com qual frequência?", "level": "strategic", "type": "text", "cronologia": "2.1", "show_if": ["p3_t2_q1"], "action_text": "Aumentar a frequência de inspeções de segurança" },
+            { "id": "p3_t2_q4", "pilar": "Pilar 3: Segurança Veicular", "tema": "Inspeções veiculares", "text_pt": "O município efetua inspeções veiculares de emissões com qual frequência?", "level": "strategic", "type": "text", "cronologia": "2.2", "show_if": ["p3_t2_q2"], "action_text": "Aumentar a frequência de inspeções de emissões" },
             { "id": "p4_t1_q1", "pilar": "Pilar 4: Educação para o Trânsito", "tema": "Campanhas educativas", "text_pt": "O município efetua campanhas educativas para o trânsito?", "level": "basic", "type": "boolean", "cronologia": "1.7", "action_text": "Realizar campanhas educativas para o trânsito" },
             { "id": "p4_t1_q2", "pilar": "Pilar 4: Educação para o Trânsito", "tema": "Campanhas educativas", "text_pt": "O município possui parcerias com a iniciativa privada e ONGs para a produção e disseminação de materiais e campanhas educativas?", "level": "strategic", "type": "boolean", "cronologia": "2.1", "show_if": ["p4_t1_q1"], "action_text": "Firmar parcerias para campanhas educativas" },
             { "id": "p4_t1_q3", "pilar": "Pilar 4: Educação para o Trânsito", "tema": "Campanhas educativas", "text_pt": "Quantas campanhas publicitárias foram circuladas voltadas à educação para o trânsito no último ano?", "level": "strategic", "type": "integer", "cronologia": "2.1", "show_if": ["p4_t1_q1"], "action_text": "Aumentar o número de campanhas publicitárias sobre trânsito" },
@@ -210,27 +201,36 @@
                     });
                     
                     if (strategicQuestions.length > 0) {
-                        const strategicDependencies = Array.from(new Set(strategicQuestions.flatMap(q => q.show_if || [])));
-                        
-                        const strategicContainer = document.createElement('div');
-                        strategicContainer.id = `strategic-container-${strategicDependencies.join('-')}`;
-                        strategicContainer.className = 'strategic-block border-t-2 border-dashed border-gray-200 mt-6 pt-6';
-                        
-                        // Adicionando o badge de "Nível Estratégico"
-                        const strategicBadge = `<div class="mb-4"><span class="inline-block bg-amber-100 text-amber-800 text-sm font-semibold px-3 py-1 rounded-full">Nível Estratégico</span></div>`;
-                        strategicContainer.innerHTML = strategicBadge;
+                        // CORREÇÃO AQUI: Agrupa as perguntas estratégicas pela exata dependência
+                        const groupedStrategics = strategicQuestions.reduce((acc, sq) => {
+                            const key = (sq.show_if || []).join('-');
+                            if (!acc[key]) acc[key] = [];
+                            acc[key].push(sq);
+                            return acc;
+                        }, {});
 
-                        strategicQuestions.forEach(q => {
-                             strategicContainer.appendChild(createQuestionElement(q));
-                        });
-                        
-                        const warningMessage = document.createElement('div');
-                        warningMessage.id = `warning-${strategicDependencies.join('-')}`;
-                        warningMessage.className = "hidden mt-4 p-3 bg-red-100 border-l-4 border-red-500 text-red-800 rounded-r-lg text-sm";
-                        warningMessage.innerHTML = `<p class="font-medium">Atenção: As ações estratégicas deste tópico serão marcadas como "APLICAR" no seu Plano de Ação.</p>`;
+                        for (const key in groupedStrategics) {
+                            const questionsInGroup = groupedStrategics[key];
+                            
+                            const strategicContainer = document.createElement('div');
+                            strategicContainer.id = `strategic-container-${key}`;
+                            strategicContainer.className = 'strategic-block border-t-2 border-dashed border-gray-200 mt-6 pt-6';
+                            
+                            const strategicBadge = `<div class="mb-4"><span class="inline-block bg-amber-100 text-amber-800 text-sm font-semibold px-3 py-1 rounded-full">Nível Estratégico</span></div>`;
+                            strategicContainer.innerHTML = strategicBadge;
 
-                        temaCard.appendChild(warningMessage);
-                        temaCard.appendChild(strategicContainer);
+                            questionsInGroup.forEach(q => {
+                                 strategicContainer.appendChild(createQuestionElement(q));
+                            });
+                            
+                            const warningMessage = document.createElement('div');
+                            warningMessage.id = `warning-${key}`;
+                            warningMessage.className = "hidden mt-4 p-3 bg-red-100 border-l-4 border-red-500 text-red-800 rounded-r-lg text-sm";
+                            warningMessage.innerHTML = `<p class="font-medium">Atenção: As ações estratégicas deste tópico serão marcadas como "APLICAR" no seu Plano de Ação.</p>`;
+
+                            temaCard.appendChild(warningMessage);
+                            temaCard.appendChild(strategicContainer);
+                        }
                     }
                     pilarSection.appendChild(temaCard);
                 }
@@ -261,10 +261,11 @@
                         </label>
                     </div>
                 `;
-            } else if (question.type === 'integer' || question.type === 'number') {
-                inputHtml = `<input type="number" name="${question.id}" min="0" class="mt-3 w-full max-w-xs bg-gray-50 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition" placeholder="0">`;
-            } else if (question.type === 'text') {
-                 inputHtml = `<input type="text" name="${question.id}" class="mt-3 w-full max-w-md bg-gray-50 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition" placeholder="Descreva aqui...">`;
+            } else if (question.type === 'integer' || question.type === 'text') {
+                 let placeholder = question.type === 'integer' ? '0' : 'Descreva aqui...';
+                 let inputType = question.type === 'integer' ? 'number' : 'text';
+                 let maxWidth = question.type === 'integer' ? 'max-w-xs' : 'max-w-md';
+                 inputHtml = `<input type="${inputType}" name="${question.id}" ${inputType === 'number' ? 'min="0"' : ''} class="mt-3 w-full ${maxWidth} bg-gray-50 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition" placeholder="${placeholder}">`;
             }
 
             questionWrapper.innerHTML = questionTitle + inputHtml;
@@ -297,24 +298,7 @@
         function generateActionPlan(event) {
             event.preventDefault();
             const form = document.getElementById('pnatrans-form');
-            const municipioInput = form.municipio;
-            if (municipioInput.value.trim() === '') {
-                municipioInput.classList.add('border-red-500', 'ring-2', 'ring-red-500');
-                municipioInput.focus();
-                let errorMsg = document.getElementById('municipio-error');
-                if (!errorMsg) {
-                    errorMsg = document.createElement('p');
-                    errorMsg.id = 'municipio-error';
-                    errorMsg.className = 'text-red-600 text-sm mt-2';
-                    municipioInput.parentNode.insertBefore(errorMsg, municipioInput.nextSibling);
-                }
-                errorMsg.textContent = 'Este campo é obrigatório.';
-                return;
-            } else {
-                 municipioInput.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
-                 document.getElementById('municipio-error')?.remove();
-            }
-
+            
             const formData = new FormData(form);
             const answers = Object.fromEntries(formData.entries());
             const plan = [];
@@ -323,22 +307,18 @@
             formSchema.filter(q => q.level === 'basic').forEach(q => {
                 let answer = false;
                 if (q.type === 'boolean') answer = answers[q.id] === 'true';
-                else if (['integer', 'number'].includes(q.type)) {
+                else if (['integer', 'text'].includes(q.type)) {
                     const value = answers[q.id];
-                    // Considera OK se o campo for preenchido com qualquer número (incluindo 0),
-                    // e APLICAR apenas se estiver vazio.
-                    answer = value !== ''; 
+                    answer = value && value.trim() !== ''; 
                 }
                 
                 answeredBasics[q.id] = answer;
                 
-                // Lógica de status
                 let status = 'APLICAR';
                 if (q.type === 'boolean') {
                     status = answer ? 'OK' : 'APLICAR';
-                } else if (['integer', 'number'].includes(q.type)) {
-                    // Para números, OK se > 0. APLICAR se for 0 ou vazio.
-                    status = (parseInt(answers[q.id], 10) || 0) > 0 ? 'OK' : 'APLICAR';
+                } else if (['integer', 'text'].includes(q.type)) {
+                    status = (answers[q.id] && (parseInt(answers[q.id], 10) || 0) > 0) || (answers[q.id] && answers[q.id].trim() !== '') ? 'OK' : 'APLICAR';
                 }
                 plan.push({ action_text: q.action_text, status: status, pilar: q.pilar, level: q.level, cronologia: q.cronologia });
             });
@@ -353,13 +333,9 @@
                 } else {
                     if (q.type === 'boolean') {
                         status = (answers[q.id] === 'true') ? 'OK' : 'APLICAR';
-                    } else if (['integer', 'number'].includes(q.type)) {
-                        const value = parseInt(answers[q.id], 10) || 0;
-                        status = value > 0 ? 'OK' : 'APLICAR';
-                        details = `Quantidade reportada: ${value}.`;
-                    } else if (q.type === 'text') {
+                    } else if (['integer', 'text'].includes(q.type)) {
                         const value = answers[q.id] || '';
-                        status = value.trim() !== '' ? 'OK' : 'APLICAR';
+                        status = value.trim() !== '' && (parseInt(value,10) || 0) > 0 || (q.type === 'text' && value.trim() !== '') ? 'OK' : 'APLICAR';
                         details = `Informação fornecida: "${value}".`;
                     }
                 }
@@ -373,13 +349,17 @@
             const container = document.getElementById('action-plan-container');
             const resultsDiv = document.getElementById('plan-results');
             if (!container || !resultsDiv) return;
+            
+            // Tenta pegar o nome do município do sessionStorage
+            const municipioInfo = JSON.parse(sessionStorage.getItem('municipioInfo') || '{}');
+            const municipioName = municipioInfo.municipio || 'Não informado';
 
             const groupedByPilar = plan.reduce((acc, action) => {
                 (acc[action.pilar] = acc[action.pilar] || []).push(action);
                 return acc;
             }, {});
 
-            resultsDiv.innerHTML = `<h3 class="text-2xl font-bold text-gray-800 mb-6">Município: ${document.getElementById('municipio').value}</h3>`;
+            resultsDiv.innerHTML = `<h3 class="text-2xl font-bold text-gray-800 mb-6">Município: ${municipioName}</h3>`;
 
             for(const pilarName in groupedByPilar) {
                 let pilarActions = groupedByPilar[pilarName];
@@ -456,5 +436,4 @@
     </script>
 </body>
 </html>
-
 
