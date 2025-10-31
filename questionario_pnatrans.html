@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questionário PNATRANS</title>
+    <!-- Incluindo o Tailwind CSS para um design moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Incluindo a fonte Roboto do Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos personalizados com a paleta Amarelo e Preto */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f5; /* Cinza claro (zinc-100) */
+        }
+        /* Efeito suave de aparição para as perguntas estratégicas */
+        .strategic-block {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        .strategic-block.visible {
+            max-height: 1500px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Estilos para os botões de rádio customizados */
+        .custom-radio-label {
+            transition: all 0.2s ease-in-out;
+        }
+        .custom-radio-label:has(input:checked) {
+            background-color: #f59e0b; /* amber-500 */
+            color: black;
+            border-color: #d97706; /* amber-600 */
+        }
+        .custom-radio-label:has(input:checked) svg {
+            stroke: black;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #000;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-gray-900">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-10">
+        
+        <!-- HEADER PERSONALIZADO -->
+        <header class="max-w-3xl mx-auto bg-amber-400 p-6 rounded-xl shadow-lg text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-black">Pesquisa PNATRANS</h1>
+            <p class="text-md text-black/80 mt-1">Indicadores de Segurança Viária</p>
+        </header>
+
+        <main class="max-w-3xl mx-auto">
+            <form id="pnatrans-form" class="space-y-8">
+                <!-- Título do Formulário em um card separado -->
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h2 class="text-2xl font-bold text-center text-gray-800">Formulário de Coleta</h2>
+                    <p id="municipio-display" class="text-center text-gray-500 mt-1">Preenchendo para o município de: Carregando...</p>
+                </div>
+                
+                <!-- Container para os pilares e temas (cards) -->
+                <div id="questionnaire-container" class="space-y-12">
+                    <div class="text-center p-8">
+                        <div class="loader inline-block"></div>
+                        <p class="mt-4 text-gray-600">Carregando perguntas...</p>
+                    </div>
+                </div>
+
+                <div class="mt-12 text-center">
+                    <button id="submit-btn" type="button" class="bg-amber-400 text-black font-bold py-4 px-10 rounded-lg hover:bg-black hover:text-amber-400 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-lg flex items-center justify-center mx-auto border-2 border-transparent">
+                        <span id="button-text">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Gerar e Salvar Plano de Ação
+                        </span>
+                        <div id="button-loader" class="loader hidden"></div>
+                    </button>
+                </div>
+            </form>
+
+            <!-- O plano de ação gerado aparecerá aqui -->
+            <div id="action-plan-container" class="mt-16 hidden">
+                <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">Plano de Ação Sugerido</h2>
+                <div id="plan-results" class="bg-white p-6 md:p-8 rounded-xl shadow-xl border border-gray-200">
+                    <!-- Conteúdo do plano será inserido aqui -->
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center mt-16 text-gray-500 text-sm">
+            <p>Gerado a partir dos Manuais do Observatório Nacional de Segurança Viária e UFPR.</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // --- INÍCIO DO JAVASCRIPT ---
+
+        // Inicializa a conexão com o Supabase
+        const SUPABASE_URL = "https://dodiijuzedniteeagbye.supabase.co"; 
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRvZGlpanV6ZWRuaXRlZWFnYnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1MTE0MDYsImV4cCI6MjA3NTA4NzQwNn0.wxhfS6pEjtcWFvKhvwIhIjLXMBiYg7j74SVnFAxDH4s";
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Variável global para guardar as perguntas buscadas do banco
+        let formSchema = [];
+
+        // 2. FUNÇÃO PARA MONTAR O FORMULÁRIO NA TELA
+        function renderQuestionnaire() {
+            const container = document.getElementById('questionnaire-container');
+            if (!container) return;
+            container.innerHTML = ''; 
+
+            const groupedByPilar = formSchema.reduce((acc, q) => {
+                if (!acc[q.pilar]) {
+                    acc[q.pilar] = {};
+                }
+                if (!acc[q.pilar][q.tema]) {
+                    acc[q.pilar][q.tema] = [];
+                }
+                acc[q.pilar][q.tema].push(q);
+                return acc;
+            }, {});
+
+            for (const pilarName in groupedByPilar) {
+                const pilarSection = document.createElement('div');
+                pilarSection.className = 'space-y-8';
+                
+                const pilarTitle = document.createElement('h2');
+                pilarTitle.className = 'text-2xl font-bold text-gray-800 pt-4';
+                pilarTitle.textContent = pilarName;
+                pilarSection.appendChild(pilarTitle);
+
+                for (const temaName in groupedByPilar[pilarName]) {
+                    const temaCard = document.createElement('div');
+                    temaCard.className = 'bg-white p-6 sm:p-8 rounded-xl shadow-md border-t-4 border-amber-400';
+                    
+                    const temaTitle = document.createElement('h3');
+                    temaTitle.className = 'text-xl font-bold text-gray-800 pb-3 mb-4';
+                    temaTitle.textContent = temaName;
+                    temaCard.appendChild(temaTitle);
+
+                    const questions = groupedByPilar[pilarName][temaName];
+                    const basicQuestions = questions.filter(q => q.level === 'basic');
+                    const strategicQuestions = questions.filter(q => q.level === 'strategic');
+
+                    basicQuestions.forEach(q => {
+                        temaCard.appendChild(createQuestionElement(q));
+                    });
+                    
+                    if (strategicQuestions.length > 0) {
+                        const groupedStrategics = strategicQuestions.reduce((acc, sq) => {
+                            const key = (sq.show_if ? (Array.isArray(sq.show_if) ? sq.show_if.join('-') : sq.show_if) : sq.id) ;
+                            if (!acc[key]) acc[key] = [];
+                            acc[key].push(sq);
+                            return acc;
+                        }, {});
+
+                        for (const key in groupedStrategics) {
+                            const questionsInGroup = groupedStrategics[key];
+                            
+                            const strategicContainer = document.createElement('div');
+                            strategicContainer.id = `strategic-container-${key}`;
+                            strategicContainer.className = 'strategic-block border-t-2 border-dashed border-gray-200 mt-6 pt-6';
+                            
+                            const strategicBadge = `<div class="mb-4"><span class="inline-block bg-amber-100 text-amber-800 text-sm font-semibold px-3 py-1 rounded-full">Nível Estratégico</span></div>`;
+                            strategicContainer.innerHTML = strategicBadge;
+
+                            questionsInGroup.forEach(q => {
+                                 strategicContainer.appendChild(createQuestionElement(q));
+                            });
+                            
+                            const warningMessage = document.createElement('div');
+                            warningMessage.id = `warning-${key}`;
+                            warningMessage.className = "hidden mt-4 p-3 bg-red-100 border-l-4 border-red-500 text-red-800 rounded-r-lg text-sm";
+                            warningMessage.innerHTML = `<p class="font-medium">Atenção: As ações estratégicas deste tópico serão marcadas como "APLICAR" no seu Plano de Ação.</p>`;
+
+                            temaCard.appendChild(warningMessage);
+                            temaCard.appendChild(strategicContainer);
+                        }
+                    }
+                    pilarSection.appendChild(temaCard);
+                }
+                container.appendChild(pilarSection);
+            }
+        }
+
+        // 3. FUNÇÃO AUXILIAR PARA CRIAR CADA PERGUNTA (HTML)
+        function createQuestionElement(question) {
+            const questionWrapper = document.createElement('div');
+            questionWrapper.className = 'py-4 first:pt-0 last:pb-0';
+            
+            let inputHtml = '';
+            const questionTitle = `<h4 class="text-lg font-semibold text-gray-800">${question.text_pt}</h4>`;
+
+            if (question.type === 'boolean') {
+                inputHtml = `
+                    <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 mt-3">
+                        <label class="custom-radio-label flex w-full items-center justify-center cursor-pointer p-3 border-2 border-gray-300 rounded-lg hover:border-amber-500">
+                            <input type="radio" name="${question.id}" value="true" class="sr-only">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span class="font-semibold">Sim</span>
+                        </label>
+                        <label class="custom-radio-label flex w-full items-center justify-center cursor-pointer p-3 border-2 border-gray-300 rounded-lg hover:border-amber-500">
+                            <input type="radio" name="${question.id}" value="false" class="sr-only">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            <span class="font-semibold">Não</span>
+                        </label>
+                    </div>
+                `;
+            } else if (question.type === 'integer' || question.type === 'text') {
+                 // *** CORREÇÃO APLICADA AQUI ***
+                 let placeholder = question.type === 'integer' ? '0' : 'Descreva aqui...';
+                 let inputType = 'text'; // Sempre será 'text'
+                 let maxWidth = question.type === 'integer' ? 'max-w-xs' : 'max-w-md';
+                 inputHtml = `<input type="${inputType}" name="${question.id}" class="mt-3 w-full ${maxWidth} bg-gray-50 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition" placeholder="${placeholder}">`;
+            }
+
+            questionWrapper.innerHTML = questionTitle + inputHtml;
+            return questionWrapper;
+        }
+        
+        // 4. LÓGICA CONDICIONAL EM AÇÃO
+        function handleConditionalLogic() {
+            const dependenciesMap = new Map();
+            formSchema.filter(q => q.level === 'strategic' && q.show_if).forEach(q => {
+                const key = Array.isArray(q.show_if) ? q.show_if.join('-') : q.show_if;
+                if (key && !dependenciesMap.has(key)) {
+                    dependenciesMap.set(key, Array.isArray(q.show_if) ? q.show_if : [q.show_if]);
+                }
+            });
+
+            dependenciesMap.forEach((basicDependencies, key) => {
+                const allBasicsTrue = basicDependencies.every(id => document.querySelector(`input[name="${id}"][value="true"]`)?.checked);
+                const anyBasicAnsweredFalse = basicDependencies.some(id => document.querySelector(`input[name="${id}"][value="false"]`)?.checked);
+                
+                const strategicContainer = document.getElementById(`strategic-container-${key}`);
+                const warningMessage = document.getElementById(`warning-${key}`);
+
+                if (strategicContainer && warningMessage) {
+                    strategicContainer.classList.toggle('visible', allBasicsTrue);
+                    warningMessage.classList.toggle('hidden', !anyBasicAnsweredFalse || allBasicsTrue);
+                }
+            });
+        }
+        
+        // 5. FUNÇÃO PARA GERAR E SALVAR O PLANO DE AÇÃO
+        async function generateAndSaveActionPlan(event) {
+            // event.preventDefault() não é necessário aqui pois o botão é type="button"
+
+            const submitBtn = document.getElementById('submit-btn');
+            const buttonText = document.getElementById('button-text');
+            const buttonLoader = document.getElementById('button-loader');
+            
+            submitBtn.disabled = true;
+            buttonText.classList.add('hidden');
+            buttonLoader.classList.remove('hidden');
+
+            try {
+                const form = document.getElementById('pnatrans-form');
+                const formData = new FormData(form);
+                const answers = Object.fromEntries(formData.entries());
+                
+                const municipioInfo = JSON.parse(sessionStorage.getItem('municipioInfo'));
+                if (!municipioInfo || !municipioInfo.id) {
+                    alert("Erro: ID do município não encontrado. Por favor, volte à página de login.");
+                    return; 
+                }
+
+                // *** CORREÇÃO APLICADA AQUI ***
+                // Gera e renderiza o plano ANTES de tentar salvar
+                console.log("[DEBUG] Gerando e renderizando o plano ANTES de salvar...");
+                generateAndRenderPlan(answers); 
+
+                const responsesToSave = [];
+                for (const questionId in answers) {
+                    const question = formSchema.find(q => q.id === questionId);
+                    if (question) {
+                        let record = {
+                            municipio_id: municipioInfo.id,
+                            question_id: questionId,
+                            resposta_text: null,
+                            resposta_numero: null,
+                            resposta_boolean: null
+                        };
+
+                        const answerValue = answers[questionId];
+
+                        if (question.type === 'boolean') {
+                            record.resposta_boolean = (answerValue === 'true');
+                        } else if (question.type === 'integer') {
+                            // Tenta converter para número. Se falhar (NaN), salva como texto.
+                            const parsedNumber = parseInt(answerValue, 10);
+                            if (!isNaN(parsedNumber) && String(parsedNumber) === answerValue) {
+                                record.resposta_numero = parsedNumber;
+                            } else {
+                                record.resposta_text = answerValue; // Salva o texto (ex: "Não sei")
+                            }
+                        } else { // 'text'
+                            record.resposta_text = answerValue;
+                        }
+                        responsesToSave.push(record);
+                    }
+                }
+                
+                console.log("[DEBUG] Tentando salvar respostas no Supabase:", responsesToSave);
+                const { error } = await client.from('respostas_pnatrans').insert(responsesToSave);
+                
+                if (error) {
+                    throw error; // Joga o erro para ser pego pelo catch
+                }
+                
+                console.log("[DEBUG] Respostas salvas com sucesso!");
+                alert("Respostas salvas com sucesso!");
+
+            } catch (error) {
+                console.error("Erro no processo:", error);
+                alert("Ocorreu um erro ao salvar suas respostas. Por favor, tente novamente.\n" + error.message);
+            } finally {
+                // ESTE BLOCO SEMPRE SERÁ EXECUTADO!
+                submitBtn.disabled = false;
+                buttonText.classList.remove('hidden');
+                buttonLoader.classList.add('hidden');
+                console.log("[DEBUG] Botão reabilitado.");
+            }
+        }
+
+        // 6. FUNÇÃO PARA GERAR E MOSTRAR O PLANO DE AÇÃO NA TELA
+        function generateAndRenderPlan(answers) {
+            console.log("[DEBUG] Iniciando generateAndRenderPlan com respostas:", answers); 
+            const plan = [];
+            const answeredBasics = {};
+
+            formSchema.forEach(q => {
+                if (q.level === 'basic') {
+                    let answer = false;
+                    if (answers.hasOwnProperty(q.id)) {
+                        if (q.type === 'boolean') answer = answers[q.id] === 'true';
+                        else if (['integer', 'text'].includes(q.type)) {
+                            const value = answers[q.id];
+                            answer = value && value.trim() !== ''; 
+                        }
+                    }
+                    answeredBasics[q.id] = answer;
+                }
+            });
+            console.log("[DEBUG] Estado dos básicos:", answeredBasics); 
+
+            formSchema.forEach(q => {
+                 let status = 'APLICAR';
+                 let details = '';
+                 if (q.level === 'basic') {
+                     if (q.type === 'boolean') {
+                        status = answeredBasics[q.id] ? 'OK' : 'APLICAR';
+                    } else if (['integer', 'text'].includes(q.type)) {
+                        const answerValue = answers.hasOwnProperty(q.id) ? answers[q.id] : '';
+                        status = (answerValue && (parseInt(answerValue, 10) > 0 || (q.type === 'text' && answerValue.trim() !== ''))) ? 'OK' : 'APLICAR';
+                    }
+                 } else { // strategic
+                    const dependencyArray = q.show_if ? (Array.isArray(q.show_if) ? q.show_if : [q.show_if]) : []; 
+                    const areBasicsOk = dependencyArray.every(id => answeredBasics[id]);
+                    
+                    if (!areBasicsOk) {
+                        details = 'Ação estratégica recomendada pois o requisito básico não foi atendido.';
+                    } else {
+                        if (answers.hasOwnProperty(q.id)) {
+                            if (q.type === 'boolean') {
+                                status = (answers[q.id] === 'true') ? 'OK' : 'APLICAR';
+                            } else if (['integer', 'text'].includes(q.type)) {
+                                const value = answers[q.id] || '';
+                                status = (value.trim() !== '' && (parseInt(value,10) > 0 || (q.type === 'text' && value.trim() !== ''))) ? 'OK' : 'APLICAR';
+                                details = `Informação fornecida: "${value}".`;
+                            }
+                        } else {
+                             status = 'APLICAR';
+                        }
+                    }
+                 }
+                 plan.push({ action_text: q.action_text, status, details, pilar: q.pilar, level: q.level, cronologia: q.cronologia });
+            });
+            
+            console.log("[DEBUG] Plano de ação gerado:", plan); 
+            renderPlanUI(plan);
+        }
+        
+        // 7. FUNÇÃO PARA DESENHAR O PLANO DE AÇÃO NA UI
+        function renderPlanUI(plan) {
+            console.log("[DEBUG] Iniciando renderPlanUI..."); 
+            const container = document.getElementById('action-plan-container');
+            const resultsDiv = document.getElementById('plan-results');
+            if (!container || !resultsDiv) {
+                console.error("[DEBUG] Erro: Container do plano de ação não encontrado."); 
+                return;
+            }
+            
+            const municipioInfo = JSON.parse(sessionStorage.getItem('municipioInfo') || '{}');
+            const municipioName = municipioInfo.nome || 'Não informado';
+
+            const groupedByPilar = plan.reduce((acc, action) => {
+                (acc[action.pilar] = acc[action.pilar] || []).push(action);
+                return acc;
+            }, {});
+
+            resultsDiv.innerHTML = `<h3 class="text-2xl font-bold text-gray-800 mb-6">Município: ${municipioName}</h3>`;
+
+            for(const pilarName in groupedByPilar) {
+                let pilarActions = groupedByPilar[pilarName];
+
+                pilarActions.sort((a, b) => {
+                    const cronA = a.cronologia || '99.99';
+                    const cronB = b.cronologia || '99.99';
+                    return cronA.localeCompare(cronB, undefined, { numeric: true });
+                });
+
+                const actionsToApply = pilarActions.filter(a => a.status === 'APLICAR');
+                const actionsOk = pilarActions.filter(a => a.status === 'OK');
+
+                const pilarTitle = `<h4 class="text-xl font-semibold text-amber-700 border-b border-gray-200 pb-2 mb-4">${pilarName}</h4>`;
+                let listHtml = '';
+                
+                if (actionsToApply.length > 0) {
+                    listHtml += `<div class="mb-6">
+                                    <h5 class="text-lg font-bold text-gray-700 mb-3">Ações Prioritárias (A Aplicar)</h5>
+                                    <ul class="space-y-4">
+                                        ${actionsToApply.map(action => createActionListItem(action)).join('')}
+                                    </ul>
+                                 </div>`;
+                }
+
+                if (actionsOk.length > 0) {
+                     listHtml += `<div class="mt-8">
+                                    <h5 class="text-lg font-bold text-gray-700 mb-3">Ações Já Cumpridas (OK)</h5>
+                                    <ul class="space-y-4">
+                                        ${actionsOk.map(action => createActionListItem(action)).join('')}
+                                    </ul>
+                                 </div>`;
+                }
+                
+                resultsDiv.innerHTML += `<div class="mb-8 last:mb-0">${pilarTitle}${listHtml}</div>`;
+            }
+
+            container.classList.remove('hidden');
+            container.scrollIntoView({ behavior: 'smooth' });
+            console.log("[DEBUG] Renderização do plano na UI concluída."); 
+        }
+
+        function createActionListItem(action) {
+            const levelBadge = `<span class="text-xs font-semibold px-2 py-0.5 rounded-full ${action.level === 'basic' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}">${action.level === 'basic' ? 'Básico' : 'Estratégico'}</span>`;
+            
+            return `
+                <li class="flex items-start">
+                    <span class="mr-4 mt-1 flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full ${action.status === 'OK' ? 'bg-green-500' : 'bg-amber-500'}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                            ${action.status === 'OK' ? '<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />' : '<path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m0 8v8m-4-4h8" />'}
+                        </svg>
+                    </span>
+                    <div>
+                        <p class="font-medium text-gray-700">${action.action_text}</p>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${action.status === 'OK' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">
+                                ${action.status === 'OK' ? 'CUMPRIDO' : 'APLICAR'}
+                            </span>
+                            ${levelBadge}
+                        </div>
+                        ${action.details ? `<p class="text-xs text-gray-500 mt-1">${action.details}</p>` : ''}
+                    </div>
+                </li>
+            `;
+        }
+        
+        // Inicialização do formulário
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log("1. Página carregada, iniciando script...");
+            
+            // Pega os dados do município da página anterior
+            const municipioInfo = JSON.parse(sessionStorage.getItem('municipioInfo') || '{}');
+            const municipioDisplay = document.getElementById('municipio-display');
+            if (municipioDisplay) {
+                if (municipioInfo.nome) {
+                    municipioDisplay.textContent = `Preenchendo para o município de: ${municipioInfo.nome}`;
+                } else {
+                    municipioDisplay.innerHTML = `Nenhum município selecionado. Por favor, <a href="login.html" class="text-amber-600 underline">volte à página inicial</a>.`;
+                }
+            }
+            console.log("2. Informações do município recuperadas.");
+
+            // Busca as perguntas do Supabase
+            console.log("3. Buscando perguntas do Supabase...");
+            const { data, error } = await client.from('perguntas_pnatrans').select('*').order('id');
+            
+            console.log("4. Resposta do Supabase recebida.");
+            console.log("   - Dados:", data);
+            console.log("   - Erro:", error);
+
+            if (error) {
+                console.error("Erro detalhado ao buscar perguntas:", error);
+                document.getElementById('questionnaire-container').innerHTML = `<p class="text-red-500 text-center">Não foi possível carregar as perguntas. Verifique sua conexão e as permissões da tabela no Supabase.</p>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                console.error("Nenhuma pergunta foi retornada do Supabase. A tabela pode estar vazia ou a RLS Policy está bloqueando a leitura para usuários anônimos.");
+                document.getElementById('questionnaire-container').innerHTML = `<p class="text-red-500 text-center font-semibold">Nenhuma pergunta encontrada.</p><p class="text-center mt-2">Verifique se a tabela 'perguntas_pnatrans' no Supabase contém dados e se a política de segurança (RLS) para a tabela permite a leitura (SELECT) para o role 'anon'.</p>`;
+                return;
+            }
+            
+            formSchema = data;
+            console.log("5. Perguntas salvas na variável. Iniciando renderização do formulário...");
+
+            renderQuestionnaire();
+            console.log("6. Renderização do formulário completa.");
+
+            document.getElementById('pnatrans-form').addEventListener('change', handleConditionalLogic);
+            document.getElementById('submit-btn').addEventListener('click', generateAndSaveActionPlan); 
+            console.log("7. Listeners de clique e mudança adicionados. Script finalizado com sucesso.");
+        });
+
+    </script>
+</body>
+</html>
