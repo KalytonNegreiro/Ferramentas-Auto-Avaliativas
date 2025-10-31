@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Informações do Município - PNATRANS</title>
+    <title>Login PNATRANS - Informações do Município</title>
     <!-- Incluindo o Tailwind CSS para um design moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Incluindo a fonte Roboto do Google Fonts -->
@@ -149,7 +149,7 @@
                             nome: municipio[0].nome_municipio
                         };
                         sessionStorage.setItem('municipioInfo', JSON.stringify(municipioData));
-                        window.location.assign('./questionario_pnatrans.html'); // <-- LINK CORRIGIDO
+                        window.location.assign('./questionario_pnatrans.html'); // <-- LINK ATUALIZADO
 
                     } catch (error) {
                         alert("Ocorreu um erro ao cadastrar o município: " + error.message);
@@ -165,4 +165,3 @@
     </script>
 </body>
 </html>
-
