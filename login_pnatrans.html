@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login PNATRANS - Informações do Município</title>
+    <title>Informações do Município - PNATRANS</title>
     <!-- Incluindo o Tailwind CSS para um design moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Incluindo a fonte Roboto do Google Fonts -->
@@ -91,7 +91,7 @@
         // Inicializa a conexão com o Supabase
         const SUPABASE_URL = "https://dodiijuzedniteeagbye.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRvZGlpanV6ZWRuaXRlZWFnYnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1MTE0MDYsImV4cCI6MjA3NTA4NzQwNn0.wxhfS6pEjtcWFvKhvwIhIjLXMBiYg7j74SVnFAxDH4s";
-        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         document.addEventListener('DOMContentLoaded', function() {
             const loginForm = document.getElementById('login-form');
@@ -149,7 +149,8 @@
                             nome: municipio[0].nome_municipio
                         };
                         sessionStorage.setItem('municipioInfo', JSON.stringify(municipioData));
-                        window.location.assign('./questionario_pnatrans.html'); // <-- LINK ATUALIZADO
+                        // CORREÇÃO: Aponta para o nome de arquivo correto
+                        window.location.assign('./questionario_pnatrans.html'); 
 
                     } catch (error) {
                         alert("Ocorreu um erro ao cadastrar o município: " + error.message);
@@ -165,3 +166,5 @@
     </script>
 </body>
 </html>
+
+
